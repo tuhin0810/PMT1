@@ -5,16 +5,25 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.example.demo.model.ProcessTask;
+
 @Document(collection = "Process_Collection")
 public class ProcessDTO {
 
 	@Id
+	private long _id;
 	private long _processId;
-	
-	
 	private String _processOwner;
 	private String _processName;
 	private List<ProcessTask> _processTask;
+	
+	
+	public long get_id() {
+		return _id;
+	}
+	public void set_id(long _id) {
+		this._id = _id;
+	}
 	public long get_processId() {
 		return _processId;
 	}

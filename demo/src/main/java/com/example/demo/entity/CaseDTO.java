@@ -8,14 +8,22 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "Case_Collection")
 public class CaseDTO {
-
+	
+	@Id
+	private long _id;
 	private long _processId;
 	private long _caseId;
 	private long _caseCreationDate;
 	private String _processOwner;
-	private List<taskDTO> _taskList;
+	private List<TaskDTO> _taskList;
+	private String _caseStatus;
 	
-	@Id
+	public long get_id() {
+		return _id;
+	}
+	public void set_id(long _id) {
+		this._id = _id;
+	}
 	public long get_processId() {
 		return _processId;
 	}
@@ -40,13 +48,20 @@ public class CaseDTO {
 	public void set_processOwner(String _processOwner) {
 		this._processOwner = _processOwner;
 	}
-	public List<taskDTO> get_taskList() {
+	public List<TaskDTO> get_taskList() {
 		return _taskList;
 	}
-	public void set_taskList(List<taskDTO> _taskList) {
+	public void set_taskList(List<TaskDTO> _taskList) {
 		this._taskList = _taskList;
 	}
 	
+	
+	public String get_caseStatus() {
+		return _caseStatus;
+	}
+	public void set_caseStatus(String _caseStatus) {
+		this._caseStatus = _caseStatus;
+	}
 	
 	@Override
 	public String toString() {

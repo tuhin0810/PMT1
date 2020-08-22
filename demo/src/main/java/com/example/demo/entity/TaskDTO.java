@@ -4,17 +4,28 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "Task_Collection")
-public class taskDTO {
+public class TaskDTO {
 	
+	
+	@Id
+	private long _id;
+
 	private long _procesId;
 	private long _caseId;
 	private long _taskParentId;
 	private String _taskName;
 	private long _creationTime;
 	private long _completionTime;
-	private long _flowDirectivity;
+	private String _flowDirectivity;
+	private String _taskStatus;
 	
-	@Id
+	public long getId() {
+		return _id;
+	}
+	public void setId(long _id) {
+		this._id = _id;
+	}
+	
 	public long get_procesId() {
 		return _procesId;
 	}
@@ -51,11 +62,18 @@ public class taskDTO {
 	public void set_completionTime(long _completionTime) {
 		this._completionTime = _completionTime;
 	}
-	public long get_flowDirectivity() {
+	public String get_flowDirectivity() {
 		return _flowDirectivity;
 	}
-	public void set_flowDirectivity(long _flowDirectivity) {
+	public void set_flowDirectivity(String _flowDirectivity) {
 		this._flowDirectivity = _flowDirectivity;
+	}
+	
+	public String get_taskStatus() {
+		return _taskStatus;
+	}
+	public void set_taskStatus(String _taskStatus) {
+		this._taskStatus = _taskStatus;
 	}
 	@Override
 	public String toString() {
