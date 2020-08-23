@@ -9,6 +9,7 @@ public class Task {
 	private long creationTime;
 	private long completionTime;
 	private long flowDirectivity;
+	private String taskStatus;
 	
 	public long getProcesId() {
 		return procesId;
@@ -53,6 +54,12 @@ public class Task {
 		this.flowDirectivity = flowDirectivity;
 	}
 	
+	public String getTaskStatus() {
+		return taskStatus;
+	}
+	public void setTaskStatus(String taskStatus) {
+		this.taskStatus = taskStatus;
+	}
 	@Override
 	public String toString() {
 		return "Task [procesId=" + procesId + ", caseId=" + caseId + ", taskParentId=" + taskParentId + ", taskName="

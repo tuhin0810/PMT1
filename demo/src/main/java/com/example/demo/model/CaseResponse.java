@@ -2,14 +2,13 @@ package com.example.demo.model;
 
 import java.util.List;
 
-
-public class Case {
+public class CaseResponse {
 	private long processId;
 	private long caseId;
 	private long caseCreationDate;
 	private String processOwner;
 	private List<Task> taskList;
-	
+	private  String caseName;
 	
 	public long getProcessId() {
 		return processId;
@@ -42,6 +41,12 @@ public class Case {
 		this.taskList = taskList;
 	}
 
+	public String getCaseName() {
+		return caseName;
+	}
+	public void setCaseName(String caseName) {
+		this.caseName = caseName;
+	}
 	@Override
 	public String toString() {
 		return "Case [processId=" + processId + ", caseId=" + caseId + ", caseCreationDate=" + caseCreationDate

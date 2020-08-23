@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,17 +12,17 @@ import com.example.demo.model.ProcessTask;
 public class ProcessDTO {
 
 	@Id
-	private long _id;
+	private ObjectId _id;
 	private long _processId;
 	private String _processOwner;
 	private String _processName;
 	private List<ProcessTask> _processTask;
 	
 	
-	public long get_id() {
+	public ObjectId get_id() {
 		return _id;
 	}
-	public void set_id(long _id) {
+	public void set_id(ObjectId _id) {
 		this._id = _id;
 	}
 	public long get_processId() {

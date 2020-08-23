@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,18 +11,19 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class CaseDTO {
 	
 	@Id
-	private long _id;
+	private ObjectId _id;
 	private long _processId;
 	private long _caseId;
 	private long _caseCreationDate;
 	private String _processOwner;
 	private List<TaskDTO> _taskList;
 	private String _caseStatus;
+	private String _caseName;
 	
-	public long get_id() {
+	public ObjectId get_id() {
 		return _id;
 	}
-	public void set_id(long _id) {
+	public void set_id(ObjectId _id) {
 		this._id = _id;
 	}
 	public long get_processId() {
@@ -61,6 +63,13 @@ public class CaseDTO {
 	}
 	public void set_caseStatus(String _caseStatus) {
 		this._caseStatus = _caseStatus;
+	}
+	
+	public String get_caseName() {
+		return _caseName;
+	}
+	public void set_caseName(String _caseName) {
+		this._caseName = _caseName;
 	}
 	
 	@Override

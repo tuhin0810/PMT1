@@ -2,7 +2,8 @@ package com.example.demo.service;
 
 import java.util.List;
 
-import com.example.demo.model.Case;
+import com.example.demo.model.CaseRequest;
+import com.example.demo.model.CaseResponse;
 import com.example.demo.model.Process;
 import com.example.demo.model.Task;
 import com.example.demo.entity.Employee;
@@ -13,11 +14,11 @@ public interface DemoService {
 	
 	public void createProcess(Process process);
 	
-	public void createCase(Case bpmCase);
+	public void createCase(CaseRequest bpmCase);
 	
-	public List<Case> getCaseByUser(String processOwner);
+	public List<CaseResponse> getCaseByUser(String processOwner);
 	
-	public Task  completeActiveTask(String processId, String caseId, String taskParentId);
+	public Task  completeActiveTask(long processId, long caseId, long taskParentId);
 	
-	public List<Task> retrieveCompletedTask(String processId, String caseId);
+	public List<Task> retrieveCompletedTask(long processId, long caseId);
 }

@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -16,7 +17,8 @@ import com.example.demo.entity.CounterDTO;
 import com.example.demo.entity.Employee;
 import com.example.demo.entity.ProcessDTO;
 import com.example.demo.entity.TaskDTO;
-import com.example.demo.model.Case;
+import com.example.demo.model.CaseRequest;
+import com.example.demo.model.CaseResponse;
 import com.example.demo.model.Process;
 import com.example.demo.model.ProcessTask;
 import com.example.demo.model.Task;
@@ -56,11 +58,13 @@ public class DemoServiceImpl implements DemoService {
 
 
 	@Override
-	public void createCase(Case bpmCase) {
+	public void createCase(CaseRequest bpmCase) {
 		int caseId = getSequence("Case_Collection");
 		 Query queryProcess = new Query();
-		 queryProcess.addCriteria(Criteria.where("_ProcessId").is(bpmCase.getProcessId()));
+		 System.out.println("************bpm********"+bpmCase.getProcessId());
+		 queryProcess.addCriteria(Criteria.where("_processId").is(bpmCase.getProcessId()));
 		List<ProcessTask> tasks = mongoTemplate.findOne(queryProcess, ProcessDTO.class).get_processTask();
+		
 		List<TaskDTO> taskDTOs = new ArrayList<>();
 		tasks.stream().forEach((task) -> {
 			TaskDTO taskDTO = new TaskDTO();
@@ -75,48 +79,55 @@ public class DemoServiceImpl implements DemoService {
 			taskDTO.set_creationTime(bpmCase.getCaseCreationDate());
 			taskDTO.set_completionTime(bpmCase.getCaseCreationDate());
 			taskDTO.set_flowDirectivity(task.getFlowDirectivity());
-			taskDTO.set_procesId(bpmCase.getProcessId());
+			taskDTO.set_processId(bpmCase.getProcessId());
 			taskDTOs.add(taskDTO);
 			
 		});
-		mongoTemplate.save(taskDTOs);
+		mongoTemplate.insertAll(taskDTOs);
 		CaseDTO caseDTO = new CaseDTO();
 		
 		caseDTO.set_caseStatus("OPEN");
 		caseDTO.set_caseCreationDate(bpmCase.getCaseCreationDate());
 		caseDTO.set_caseId(caseId);
+		caseDTO.set_caseName(bpmCase.getCaseName());
 		caseDTO.set_processId(bpmCase.getProcessId());
 		caseDTO.set_processOwner(bpmCase.getProcessOwner());
-		caseDTO.set_taskList(null);
+		List<TaskDTO> taskDTOFiltered = taskDTOs.stream()
+		.filter( f -> f.get_taskStatus().equalsIgnoreCase("ACTIVE"))
+				.collect(Collectors.toList());
+		caseDTO.set_taskList(taskDTOFiltered);
 		mongoTemplate.save(caseDTO);
 	}
 
 
 	@Override
-	public List<Case> getCaseByUser(String processOwner) {
+	public List<CaseResponse> getCaseByUser(String processOwner) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("_processOwner").is(processOwner));
 		List<CaseDTO> caseDTOs = mongoTemplate.find(query,CaseDTO.class);
-		List<Case> cases = new ArrayList<>();
+		List<CaseResponse> cases = new ArrayList<>();
 		caseDTOs.stream().forEach(caseComponent -> {
-			Case caseModel =  new Case();
+			CaseResponse caseModel =  new CaseResponse();
 			caseModel.setCaseCreationDate(caseComponent.get_caseCreationDate());
+			caseModel.setCaseName(caseComponent.get_caseName());
 			caseModel.setCaseId(caseComponent.get_caseId());
 			caseModel.setProcessId(caseComponent.get_processId());
 			caseModel.setProcessOwner(caseComponent.get_processOwner());
-			if(0 == caseComponent.get_taskList().size()) {
+			if(0 < caseComponent.get_taskList().size()) {
 				List<Task> tasks = new ArrayList<>();
 				List<TaskDTO> taskDTOs = caseComponent.get_taskList();
+				System.out.println("*******TaskList******"+taskDTOs.toString());
 				taskDTOs.stream()
-				.filter( f -> f.get_taskStatus().equalsIgnoreCase("ACTIVE"))
+				.filter( f -> f.get_taskStatus().equalsIgnoreCase("ACTIVE")).collect(Collectors.toList())
 				.forEach(taskDTO -> {
 					Task activeTask = new Task();
 					activeTask.setCaseId(taskDTO.get_caseId());
 					activeTask.setCompletionTime(taskDTO.get_completionTime());
 					activeTask.setCreationTime(taskDTO.get_creationTime());
-					activeTask.setProcesId(taskDTO.get_procesId());
+					activeTask.setProcesId(taskDTO.get_processId());
 					activeTask.setTaskName(taskDTO.get_taskName());
 					activeTask.setTaskParentId(taskDTO.get_taskParentId());
+					activeTask.setTaskStatus(taskDTO.get_taskStatus());
 					tasks.add(activeTask);
 				});
 			caseModel.setTaskList(tasks);
@@ -128,11 +139,15 @@ public class DemoServiceImpl implements DemoService {
 
 
 	@Override
-	public Task completeActiveTask(String processId, String caseId, String taskParentId) {
+	public Task completeActiveTask(long processId, long caseId, long taskParentId) {
 		Query queryActiveTask = new Query();
 		queryActiveTask = queryActiveTask.addCriteria(new Criteria().andOperator(Criteria.where("_processId").is(processId),
 				Criteria.where("_caseId").is(caseId),Criteria.where("_taskStatus").is("ACTIVE"),
 				Criteria.where("_taskParentId").is(taskParentId)));
+		
+		List <TaskDTO> t =mongoTemplate.find( new Query().addCriteria(new Criteria().andOperator(Criteria.where("_processId").is(processId),
+				Criteria.where("_caseId").is(caseId))),TaskDTO.class);
+		System.out.println("=========db response============"+t.toString());
 		
 		Update update = new Update().set("_taskStatus", "COMPLETED");
 		
@@ -142,7 +157,6 @@ public class DemoServiceImpl implements DemoService {
 		
 		queryCompletedTask = queryCompletedTask.addCriteria(new Criteria().andOperator(Criteria.where("_processId").is(processId),
 				Criteria.where("_caseId").is(caseId),Criteria.where("_taskParentId").gt(taskParentId)));
-		
 		
 		TaskDTO taskDTO = mongoTemplate.findAndModify(queryCompletedTask, 
 				new Update().set("_taskStatus", "ACTIVE"), 
@@ -157,35 +171,37 @@ public class DemoServiceImpl implements DemoService {
 		casePushQuery.addCriteria(new Criteria().andOperator(Criteria.where("_processId").is(processId),
 				Criteria.where("_caseId").is(caseId)));
 		
-		mongoTemplate.findAndModify(caseQuery,new Update().set("_taskList.$,_taskStatus", "COMPLETED"),CaseDTO.class);
+		mongoTemplate.findAndModify(caseQuery,new Update().set("_taskList.$._taskStatus", "COMPLETED"),CaseDTO.class);
 		mongoTemplate.findAndModify(casePushQuery,new Update().push("_taskList", taskDTO),CaseDTO.class);
 		Task activeTask = new Task();
 		activeTask.setCaseId(taskDTO.get_caseId());
 		activeTask.setCompletionTime(taskDTO.get_completionTime());
 		activeTask.setCreationTime(taskDTO.get_creationTime());
-		activeTask.setProcesId(taskDTO.get_procesId());
+		activeTask.setProcesId(taskDTO.get_processId());
 		activeTask.setTaskName(taskDTO.get_taskName());
 		activeTask.setTaskParentId(taskDTO.get_taskParentId());
+		activeTask.setTaskStatus(taskDTO.get_taskStatus());
 		return activeTask;
 	}
 
 
 	@Override
-	public List<Task> retrieveCompletedTask(String processId, String caseId) {
+	public List<Task> retrieveCompletedTask(long processId, long caseId) {
 		Query query = new Query();
 		query.addCriteria(new Criteria().andOperator(Criteria.where("_processId").is(processId),Criteria.where("_caseId").is(caseId)));
 		List<TaskDTO> taskDTOs = mongoTemplate.find(query,TaskDTO.class);
 		List<Task> tasks = new ArrayList<>();
 		taskDTOs.stream()
-		.filter( f -> f.get_taskStatus().equalsIgnoreCase("ACTIVE"))
+		.filter( f -> f.get_taskStatus().equalsIgnoreCase("COMPLETED")).collect(Collectors.toList())
 		.forEach(taskDTO -> {
 			Task compltedTask = new Task();
 			compltedTask.setCaseId(taskDTO.get_caseId());
 			compltedTask.setCompletionTime(taskDTO.get_completionTime());
 			compltedTask.setCreationTime(taskDTO.get_creationTime());
-			compltedTask.setProcesId(taskDTO.get_procesId());
+			compltedTask.setProcesId(taskDTO.get_processId());
 			compltedTask.setTaskName(taskDTO.get_taskName());
 			compltedTask.setTaskParentId(taskDTO.get_taskParentId());
+			compltedTask.setTaskStatus(taskDTO.get_taskStatus());
 			tasks.add(compltedTask);
 		});
 		return tasks;

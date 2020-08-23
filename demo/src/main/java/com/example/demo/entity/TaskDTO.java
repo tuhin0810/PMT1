@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -8,9 +9,9 @@ public class TaskDTO {
 	
 	
 	@Id
-	private long _id;
+	private ObjectId _id;
 
-	private long _procesId;
+	private long _processId;
 	private long _caseId;
 	private long _taskParentId;
 	private String _taskName;
@@ -19,18 +20,18 @@ public class TaskDTO {
 	private String _flowDirectivity;
 	private String _taskStatus;
 	
-	public long getId() {
+	public ObjectId getId() {
 		return _id;
 	}
-	public void setId(long _id) {
+	public void setId(ObjectId _id) {
 		this._id = _id;
 	}
 	
-	public long get_procesId() {
-		return _procesId;
+	public long get_processId() {
+		return _processId;
 	}
-	public void set_procesId(long _procesId) {
-		this._procesId = _procesId;
+	public void set_processId(long _procesId) {
+		this._processId = _procesId;
 	}
 	public long get_caseId() {
 		return _caseId;
@@ -77,9 +78,9 @@ public class TaskDTO {
 	}
 	@Override
 	public String toString() {
-		return "taskDTO [_procesId=" + _procesId + ", _caseId=" + _caseId + ", _taskParentId=" + _taskParentId
+		return "taskDTO [_procesId=" + _processId + ", _caseId=" + _caseId + ", _taskParentId=" + _taskParentId
 				+ ", _taskName=" + _taskName + ", _creationTime=" + _creationTime + ", _completionTime="
-				+ _completionTime + ", _flowDirectivity=" + _flowDirectivity + ", get_procesId()=" + get_procesId()
+				+ _completionTime + ", _flowDirectivity=" + _flowDirectivity + ", get_procesId()=" + get_processId()
 				+ ", get_caseId()=" + get_caseId() + ", get_taskParentId()=" + get_taskParentId() + ", get_taskName()="
 				+ get_taskName() + ", get_creationTime()=" + get_creationTime() + ", get_completionTime()="
 				+ get_completionTime() + ", get_flowDirectivity()=" + get_flowDirectivity() + "]";
